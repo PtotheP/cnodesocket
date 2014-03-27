@@ -1,0 +1,18 @@
+html
+	head
+		title #{title}
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		script(type='text/javascript', src='//code.jquery.com/jquery-1.10.2.min.js')
+		block head
+		
+	body
+		#side
+			header
+				h1 Hier so meine Seite
+				hr
+				block header
+			article
+				block content
+			footer
+				block footer
+				|MeineSeite - (c) by Philipp Seitz 2013

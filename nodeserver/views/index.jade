@@ -1,0 +1,13 @@
+extends layout
+
+block head
+	script(src='/socket.io/socket.io.js')
+	script(type='text/javascript', src='/javascripts/connect.js')
+
+block content
+	h1 Index - Seite
+	#text
+	form(class='control')
+		input(type='button', value='off', id='button0', class='sbutton')
+
+	

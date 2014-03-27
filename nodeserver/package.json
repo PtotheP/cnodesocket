@@ -1,0 +1,28 @@
+{
+    "name": "nodeserver",
+    "description": "",
+    "version": "0.0.1",
+    "main": "./nodeserver.js",
+    "author": {
+        "name": "Philipp Seitz",
+        "email": "seitz.philipp@outlook.com"
+    },
+    "dependencies": {
+        "express": "latest",
+        "jade": "latest",
+        "stylus": "latest",
+        "nib": "latest",
+        "socket.io": "latest"
+    },
+    "keywords": [],
+    "licenses": {
+        "type": "none"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/YOUR_LOGIN/nodeserver.git"
+    },
+    "bugs": {
+        "url": "http://github.com/YOUR_LOGIN/nodeserver/issues"
+    }
+}
