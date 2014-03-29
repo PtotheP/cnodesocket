@@ -10,98 +10,122 @@
 #include<arpa/inet.h> //inet_addr
 #include<string.h>
 #include<unistd.h>    //write
+#include <pthread.h>
 
 
 int messaging(int new_socket);
 int handle(char shandle[]);
 int control(char command[]);
- 
-int main(int argc , char *argv[])
-{
+void *texting(void *pSocket);
+
+int main(int argc, char *argv[]) {
 
     int socket_desc, new_socket, c;
     struct sockaddr_in server, client;
+    pthread_t textthread;
 
     //Create socket
-    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
-    if (socket_desc == -1)
-    {
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_desc == -1) {
         printf("Could not create socket");
     }
-     
+
     //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons( 5000 );
-     
+    server.sin_port = htons(5000);
+
     //Bind
-    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
-    {
+    if (bind(socket_desc, (struct sockaddr *) &server, sizeof (server)) < 0) {
         puts("bind failed");
     }
     puts("bind done");
-    
+
     //Listen
-    listen(socket_desc , 3);
-    
+    listen(socket_desc, 3);
+
     //Accept and incoming connection
     puts("Waiting for incoming connections...\n");
-    c = sizeof(struct sockaddr_in);
-    while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ){
-        
-        if (new_socket<0)
-        {
+    c = sizeof (struct sockaddr_in);
+    while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t*) & c))) {
+
+        if (new_socket < 0) {
             perror("accept failed");
         }
         puts("Connection accepted");
         puts("*************************************\n");
-        
 
-        while(messaging(new_socket));
+        pthread_create(&textthread, NULL, texting, (void *) &new_socket);
+
+        while (messaging(new_socket));
+
         close(new_socket);
+        puts("Connection closed");
+        puts("*************************************\n");
     }
-    
-     
+
+
     return 0;
 }
 
+int messaging(int new_socket) {
 
-int messaging(int new_socket){
-    
-            char message[2000], server_reply[2000];
-            
-            memset(server_reply, 0, 2000);
-            memset(message, 0, 2000);
-            
-            //Receive a reply from client
-            //recv is blocking
-            if( recv(new_socket, server_reply , 2000 , 0) <= 0){   
-                puts("recv failed");
-                return 0;
-            }
-            
-            puts("Reply received:");
-            puts(server_reply);
-            if(handle(server_reply)<= 0){
-                puts("Could not handle received DATA");
-                strcpy(message, "Could not handle received DATA");
-            }else{
-                strcpy(message, "DATA handled");
-            }
-            
+    char message[2000], server_reply[2000];
 
-            //Reply to the client
+    memset(server_reply, 0, 2000);
+    memset(message, 0, 2000);
 
-            if(write(new_socket , message , strlen(message)) < 0){
-                puts("COULD NOT WRITE");
-            }
-            
-            puts("______________________________\n");
-            return 1;
+    //Receive a reply from client
+    //recv is blocking
+    if (recv(new_socket, server_reply, 2000, 0) <= 0) {
+        puts("recv failed");
+        return 0;
+    }
+
+    puts("Reply received:");
+    puts(server_reply);
+    if (handle(server_reply) <= 0) {
+        puts("Could not handle received DATA");
+        strcpy(message, "Could not handle received DATA");
+    } else {
+        strcpy(message, "DATA handled");
+    }
+
+
+    //Reply to the client
+
+    if (write(new_socket, message, strlen(message)) < 0) {
+        puts("COULD NOT WRITE");
+    }
+
+    puts("______________________________\n");
+    return 1;
 }
 
-
-int handle(char shandle[]){
+int handle(char shandle[]) {
     //handle the incoming stream
     return 1;
+}
+
+void *texting(void *pSocket) {
+
+    int textsocket = *(int*) pSocket;
+    int counter;
+    counter = 0;
+    char message[2000];
+
+    while (1) {
+        
+        memset(message, 0, 2000);
+        snprintf(message, 2000, "%d", counter);
+
+        if (write(textsocket, message, strlen(message)) < 0) {
+            puts("COULD NOT WRITE");
+            return 0;
+        }
+
+        counter++;
+        usleep(1000000); //Give the prozessor some Time to do his own stuff..
+
+    }
 }

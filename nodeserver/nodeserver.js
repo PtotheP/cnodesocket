@@ -69,9 +69,18 @@ var PORT = 5000;
 //Verbindet sich mit dem cserver
 cserver.connect(PORT, HOST, function() {
 });
+//Genereller Listener vom cserver
+cserver.on('data', function(data){
+    console.log(data.toString());
+});
+
+/*
+ * Brücke zwischen socket.io und dem socket in c
+ */
 
 //Listener für eingehende 'Connections' vom Browser
 io.sockets.on('connection', function(socket) {
+    console.log('eingehende Browserverbindung');
     //Listener vom cserver
     cserver.on('data', function(data) {
         //Leitet die empfangenen Daten an den Browser weiter
