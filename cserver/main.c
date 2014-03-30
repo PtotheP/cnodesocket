@@ -11,6 +11,7 @@
 #include<string.h>
 #include<unistd.h>      //write
 #include <pthread.h>
+#include"tempsensor.h"
 
 
 int messaging(int new_socket);
@@ -121,22 +122,18 @@ int handle(char shandle[]) {
 void *texting(void *pSocket) {
 
     int textsocket = *(int*) pSocket;
-    int counter;
-    counter = 0;
     char message[2000];
 
     while (textingenabled) {
 
         memset(message, 0, 2000);
-        snprintf(message, 2000, "%d", counter);
+        snprintf(message, 2000, "Temperatur: %d", Temp());
 
         if (write(textsocket, message, strlen(message)) < 0) {
             puts("COULD NOT WRITE");
             return NULL;
         }
-
-        counter++;
+        
         usleep(1000000); //Give the prozessor some Time to do his own stuff..
-
     }
 }

@@ -80,6 +80,7 @@ cserver.on('data', function(data){
 //Listener für eingehende 'Connections' vom Browser
 io.sockets.on('connection', function(socket) {
     console.log('eingehende Browserverbindung');
+    console.log(socket.id);
     //Listener vom cserver
     cserver.on('data', function(data) {
         //Leitet die empfangenen Daten an den Browser weiter
