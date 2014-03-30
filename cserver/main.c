@@ -7,9 +7,9 @@
 #include<stdio.h>
 #include<stdlib.h>      //strtol
 #include<sys/socket.h>
-#include<arpa/inet.h> //inet_addr
+#include<arpa/inet.h>   //inet_addr
 #include<string.h>
-#include<unistd.h>    //write
+#include<unistd.h>      //write
 #include <pthread.h>
 
 
@@ -20,7 +20,7 @@ void *texting(void *pSocket);
 
 int main(int argc, char *argv[]) {
 
-    int socket_desc, new_socket, c;
+    int socket_desc, socket_con, c;
     struct sockaddr_in server, client;
     pthread_t textthread;
 
@@ -44,22 +44,25 @@ int main(int argc, char *argv[]) {
     //Listen
     listen(socket_desc, 3);
 
-    //Accept and incoming connection
+    //Accept an incoming connection
     puts("Waiting for incoming connections...\n");
     c = sizeof (struct sockaddr_in);
-    while ((new_socket = accept(socket_desc, (struct sockaddr *) &client, (socklen_t*) & c))) {
+    while ((socket_con = accept(socket_desc, (struct sockaddr *) &client, (socklen_t*) & c))) {
 
-        if (new_socket < 0) {
+        if (socket_con < 0) {
             perror("accept failed");
         }
         puts("Connection accepted");
         puts("*************************************\n");
 
-        pthread_create(&textthread, NULL, texting, (void *) &new_socket);
+        pthread_create(&textthread, NULL, texting, (void *) &socket_con);
 
-        while (messaging(new_socket));
+        while (messaging(socket_con));
+        
+        pthread_join(textthread, NULL);
 
-        close(new_socket);
+        close(socket_con);
+        
         puts("Connection closed");
         puts("*************************************\n");
     }
@@ -68,7 +71,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int messaging(int new_socket) {
+int messaging(int pSocket) {
 
     char message[2000], server_reply[2000];
 
@@ -77,7 +80,7 @@ int messaging(int new_socket) {
 
     //Receive a reply from client
     //recv is blocking
-    if (recv(new_socket, server_reply, 2000, 0) <= 0) {
+    if (recv(pSocket, server_reply, 2000, 0) <= 0) {
         puts("recv failed");
         return 0;
     }
@@ -94,7 +97,7 @@ int messaging(int new_socket) {
 
     //Reply to the client
 
-    if (write(new_socket, message, strlen(message)) < 0) {
+    if (write(pSocket, message, strlen(message)) < 0) {
         puts("COULD NOT WRITE");
     }
 
@@ -107,6 +110,8 @@ int handle(char shandle[]) {
     return 1;
 }
 
+//Function called in textthraed
+
 void *texting(void *pSocket) {
 
     int textsocket = *(int*) pSocket;
@@ -115,7 +120,7 @@ void *texting(void *pSocket) {
     char message[2000];
 
     while (1) {
-        
+
         memset(message, 0, 2000);
         snprintf(message, 2000, "%d", counter);
 

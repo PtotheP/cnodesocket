@@ -7,7 +7,6 @@ var nib = require('nib');
 var net = require('net');
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var connector = require('./modules/connector');
 
 function compile(str, path, fn) {
     return stylus(str)
